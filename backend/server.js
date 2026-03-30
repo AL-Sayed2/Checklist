@@ -10,8 +10,13 @@ dotenv.config({ override: true });
 
 const app = express();
 
-app.use(cors()); // Allow all origins for easier Vercel/Railway deployment
+app.use(cors({
+  origin: process.env.FRONTEND_URL
+}));
 app.use(express.json());
+
+// Health Check Route
+app.get('/', (req, res) => res.json({ status: 'ok' }));
 
 // Main Routes
 app.use('/api/auth', authRoutes);
