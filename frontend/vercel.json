@@ -1,0 +1,11 @@
+{
+  "skip": [
+    "^/assets/.*"
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
