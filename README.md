@@ -53,35 +53,47 @@ A full-stack web application designed for dental and medical clinics to manage a
    npm run dev
    ```
 
-## Deployment Guide (Vercel & Railway)
+## Deployment Guide (Render)
 
-This repository functions as a "mono-repo", meaning both the frontend and backend live in the same Git repository. Follow these exact steps to host them for free.
+This repository functions as a "mono-repo", meaning both the frontend and backend live in the same Git repository. Render is an excellent platform for this. Follow these exact steps to host them for free.
 
-### Step 1: Deploy Backend to Railway
+### Step 1: Deploy Backend (Web Service)
 
-1. Go to [Railway.app](https://railway.app/) and create a new project by clicking **Deploy from GitHub repo**.
-2. Select your `AL-Sayed2/Checklist` repository.
-3. Railway will start scanning. Before it finishes mapping the root folder (which has nothing to build), click into the new service's settings.
-4. Go to the **Settings** tab. Scroll down to **Root Directory** and change it to `/backend`.
-5. Scroll down to **Start Command** and ensure it says: `npm start`
-6. Go to the **Variables** tab and paste the exact contents of your `backend/.env` file. Important: For `FRONTEND_URL`, leave it blank or as `http://localhost:5173` for now, we will update it in Step 2!
-7. Railway will now automatically build and deploy your Node.js backend. Once complete, click **Settings > Networking > Generate Domain**. Copy this domain (e.g., `https://checklist-backend-production.up.railway.app`).
+1. Go to [Render.com](https://render.com/) and create a new **Web Service**.
+2. Connect your `AL-Sayed2/Checklist` GitHub repository.
+3. In the setup screen, configure the following:
+   * **Name:** `checklist-api` (or similar)
+   * **Root Directory:** `backend`
+   * **Environment:** `Node`
+   * **Build Command:** `npm install`
+   * **Start Command:** `npm start`
+4. Expand the **Environment Variables** section and paste the exact contents of your `backend/.env` file. 
+   *(Note: Leave `FRONTEND_URL` blank or as `http://localhost:5173` just for testing until Step 2 is finished!)*
+5. Click **Create Web Service**. Wait for the backend to deploy, and copy the `.onrender.com` URL shown at the top left of the screen!
 
-### Step 2: Deploy Frontend to Vercel
+### Step 2: Deploy Frontend (Static Site)
 
-1. Go to [Vercel.com](https://vercel.com/) and click **Add New... > Project**.
-2. Import your `AL-Sayed2/Checklist` GitHub repository.
-3. In the "Configure Project" screen, look for **Root Directory**. Click **Edit** and select the `frontend` folder.
-4. Framework Preset will automatically switch to **Vite**.
-5. In **Environment Variables**, add:
-   * Name: `VITE_API_URL`
-   * Value: `[Paste the Railway domain you generated in Step 1]`
-6. Click **Deploy**. Vercel will build your React application and generate a public URL for your frontend (e.g., `https://checklist-frontend.vercel.app`).
-7. Copy this Vercel URL.
+1. Go back to the Render dashboard and click **New > Static Site**.
+2. Connect your `AL-Sayed2/Checklist` repository again.
+3. In the setup screen, configure the following:
+   * **Name:** `checklist-app` (or similar)
+   * **Root Directory:** `frontend`
+   * **Build Command:** `npm install && npm run build`
+   * **Publish directory:** `dist`
+4. Expand the **Environment Variables** section and add:
+   * Key: `VITE_API_URL`
+   * Value: `[Paste your Backend's .onrender.com URL from Step 1]`
+5. Click **Create Static Site**.
+6. **Important Routing Rule:** Once the static site is created, click the **Redirects/Rewrites** tab on the left.
+   * Add a new rule: 
+     * **Source:** `/*`
+     * **Destination:** `/index.html`
+     * **Action:** `Rewrite`
+   * Click **Save Changes**. This prevents your React App from showing a 404 error when refreshing the page!
 
 ### Step 3: Connect Them Together
 
-1. Go back to your **Railway Dashboard**.
-2. Navigate to your backend service -> **Variables**.
-3. Update the `FRONTEND_URL` variable, and paste the Vercel URL you copied in Step 2.
-4. Your Railway app will rapidly reload. The applications are now successfully linked and live!
+1. Grab the public `.onrender.com` URL from your newly deployed Frontend Static Site.
+2. Go back to your **Backend Web Service > Environment** tab.
+3. Update the `FRONTEND_URL` variable, pasting your exact Frontend URL (e.g. `https://checklist-app.onrender.com`).
+4. Click **Save Changes** (this will trigger a backend redeploy). The applications are now successfully linked and live!
