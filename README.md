@@ -1,4 +1,4 @@
-# Clinic Weekly Checklist
+# AADC IPC Checklist
 
 A full-stack web application designed for dental and medical clinics to manage and digitize their weekly room inspection checklists. Features a responsive React frontend with data visualization, a Node.js backend with MongoDB, and an AI-powered insights generator using Google Gemini.
 

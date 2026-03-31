@@ -31,8 +31,12 @@ const AISummary = () => {
         const start = new Date(now.getFullYear(), 0, 1);
         const days = Math.floor((now - start) / (24 * 60 * 60 * 1000));
         activeWeek = `${now.getFullYear()}-W${Math.ceil((now.getDay() + 1 + days) / 7).toString().padStart(2, '0')}`;
-        const res = await getWeek(activeWeek);
-        if (res && res.data) activeData = res.data;
+        try {
+          const res = await getWeek(activeWeek);
+          if (res && res.data) activeData = res.data;
+        } catch (err) {
+          // 404 is fine, activeData remains empty {}
+        }
       }
       setData(activeData);
       setWeek(activeWeek);

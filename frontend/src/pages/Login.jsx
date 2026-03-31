@@ -27,7 +27,7 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="card login-card">
-        <h1>🏥 Clinic Checklist</h1>
+        <h1>🏥 AADC IPC Checklist</h1>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="input-group">

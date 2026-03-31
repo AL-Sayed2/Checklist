@@ -23,7 +23,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="nav-left">
         <div className="nav-title">
-          🏥 Clinic Checklist
+          🏥 AADC IPC Checklist
           <span className="nav-week">{currentWeek()}</span>
         </div>
         <div className="nav-links">
