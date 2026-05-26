@@ -1,6 +1,7 @@
 import express from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import authMiddleware from '../middleware/auth.js';
+import { ROOMS, ROOM_NAMES, CHECKLIST_ITEMS } from '../config/constants.js';
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -12,6 +13,9 @@ router.post('/summary', async (req, res) => {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
+    const roomMapping = ROOMS.map((r, i) => `${r}=${ROOM_NAMES[i]}`).join(', ');
+    const itemMapping = CHECKLIST_ITEMS.map((item, i) => `${i}=${item.split('. ')[1] || item}`).join(', ');
+
     const prompt = `You are a clinic quality control analyst reviewing a weekly inspection.
 
 Current week (${currentWeek.week}):
@@ -22,9 +26,9 @@ Current week (${currentWeek.week}):
 
 Previous weeks compliance trend: ${history.map((h) => `${h.week}: ${h.compliance}%`).join(', ')}
 
-Room names: rm1=RM1, rm2=RM2, rm3=RM3, rm4=RM4, rm5=RM5, rm6=RM6 Triage, rm7=RM7 Sterile, rm8=RM8 OPG, sr=S.R., mwr=M.W.R.
+Room names: ${roomMapping}
 
-Checklist items by index: 0=Daily checklist for room temp, 1=Daily checklist for fridge temp, 2=No expired materials, 3=Labelled materials, 4=No pic/figurine on table, 5=No materials on counter top, 6=No materials under sink, 7=No over stocking, 8=Yellow container, 9=Disinfecting rooms, 10=X-ray beam cover, 11=Normal saline, 12=No extension, 13=Clean floor, 14=Barrier film on dental chair, 15=Plastic sleeve on handpieces, 16=Bowie & Dick test, 17=DUWL, 18=PPE usage, 19=Hand hygiene, 20=Monthly material update
+Checklist items by index: ${itemMapping}
 
 Write a professional 4-6 sentence summary covering:
 1. Overall compliance this week and whether it improved or declined vs the trend

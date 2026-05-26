@@ -6,8 +6,8 @@ A full-stack web application designed for dental and medical clinics to manage a
 
 * **Weekly Tracking:** Grid-based interface to mark 21 inspection items across 10 rooms.
 * **Smart Dashboard:** Aggregates pass/fail compliance percentages instantly using custom charts.
-* **Historical Memory:** Keeps 52 weeks of history with easy recall capabilities.
-* **AI Agent:** Integrates directly with Gemini 1.5 Flash to automatically interpret compliance trends and suggest weekly operational adjustments.
+* **Historical Memory:** Keeps all weeks of history indefinitely with easy recall capabilities.
+* **AI Agent:** Integrates directly with Gemini 2.5 Flash to automatically interpret compliance trends and suggest weekly operational adjustments.
 * **Secure Access:** Single shared clinic password approach protected by JWT authentication.
 
 ## Pre-requisites

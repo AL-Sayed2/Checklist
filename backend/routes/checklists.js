@@ -5,10 +5,10 @@ import authMiddleware from '../middleware/auth.js';
 const router = express.Router();
 router.use(authMiddleware);
 
-// GET all saved weeks sorted by savedAt descending (limit 52)
+// GET all saved weeks sorted by savedAt descending
 router.get('/', async (req, res) => {
   try {
-    const checklists = await Checklist.find().sort({ savedAt: -1 }).limit(52);
+    const checklists = await Checklist.find().sort({ savedAt: -1 });
     res.json(checklists);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

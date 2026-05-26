@@ -1,25 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ChecklistTable from '../components/ChecklistTable';
 import { getWeek, saveChecklist, computeCompliance } from '../api';
+import { getCurrentWeekString } from '../utils/dateUtils';
 
 const Checklist = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [week, setWeek] = useState(() => {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 1);
-    const days = Math.floor((now - start) / (24 * 60 * 60 * 1000));
-    const weekNumber = Math.ceil((now.getDay() + 1 + days) / 7);
-    return `${now.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`;
+    if (location.state && location.state.week) {
+      return location.state.week;
+    }
+    return getCurrentWeekString();
   });
 
-  const [data, setData] = useState({});
-  const [notes, setNotes] = useState('');
+  const [data, setData] = useState(() => {
+    if (location.state && location.state.data) {
+      return location.state.data;
+    }
+    return {};
+  });
+
+  const [notes, setNotes] = useState(() => {
+    if (location.state && location.state.notes) {
+      return location.state.notes;
+    }
+    return '';
+  });
+
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Track if we initialized data from navigation state to skip initial fetch
+  const isLoadedFromState = useRef(
+    !!(location.state && location.state.week && location.state.data)
+  );
+
   useEffect(() => {
     const loadWeek = async () => {
+      if (isLoadedFromState.current) {
+        isLoadedFromState.current = false;
+        // Clean location.state so refresh doesn't trigger it again
+        navigate(location.pathname, { replace: true, state: null });
+        return;
+      }
+
       try {
         setLoading(true);
         const saved = await getWeek(week);

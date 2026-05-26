@@ -2,36 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { computeCompliance, getWeek } from '../api';
-
-const rooms = ['rm1', 'rm2', 'rm3', 'rm4', 'rm5', 'rm6', 'rm7', 'rm8', 'sr', 'mwr'];
-const roomNames = ['RM1', 'RM2', 'RM3', 'RM4', 'RM5', 'RM6 Triage', 'RM7 Sterile', 'RM8 OPG', 'S.R.', 'M.W.R.'];
-const items = [
-  '1. Daily checklist for room temp.',
-  '2. Daily checklist for fridge temp.',
-  '3. No expired materials in the room',
-  '4. There is labelled on each materials',
-  '5. No pic. & figurine on the table',
-  '6. No materials & inst. on the counter top',
-  '7. No any materials under the sink',
-  '8. No over stocking in the room',
-  '9. Yellow container 28 days or 3/4 of the redline',
-  '10. Disinfecting the rooms properly',
-  '11. X-ray beam cover',
-  '12. Normal saline to discard end of the day (24 hrs)',
-  '13. No extension in the room',
-  '14. Clean floor',
-  '15. Barrier film on dental chair',
-  '16. Plastic sleeve on handpieces',
-  '17. Bowie & Dick test / Spore test / Autoclave logsheet',
-  '18. DUWL (dental unit waterline)',
-  '19. Proper usage of PPE',
-  '20. Proper Hand hygiene / clean and short nails',
-  '21. Monthly Material Update'
-];
+import { ROOMS as rooms, ROOM_NAMES as roomNames, CHECKLIST_ITEMS as items } from '../constants/checklistConfig';
+import { getCurrentWeekString } from '../utils/dateUtils';
 
 const Summary = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [week, setWeek] = useState(() => {
+    if (location.state && location.state.week) {
+      return location.state.week;
+    }
+    return getCurrentWeekString();
+  });
   const [data, setData] = useState({});
   const [stats, setStats] = useState({ compliance: 0, totalPass: 0, totalFail: 0, totalNA: 0, totalEmpty: 210 });
   const [loading, setLoading] = useState(true);
@@ -42,12 +24,8 @@ const Summary = () => {
       if (location.state && location.state.data) {
         activeData = location.state.data;
       } else {
-        const now = new Date();
-        const start = new Date(now.getFullYear(), 0, 1);
-        const days = Math.floor((now - start) / (24 * 60 * 60 * 1000));
-        const currentWeekStr = `${now.getFullYear()}-W${Math.ceil((now.getDay() + 1 + days) / 7).toString().padStart(2, '0')}`;
         try {
-          const res = await getWeek(currentWeekStr);
+          const res = await getWeek(week);
           if (res && res.data) activeData = res.data;
         } catch (err) {}
       }
@@ -56,7 +34,7 @@ const Summary = () => {
       setLoading(false);
     };
     loadFromStateOrAPI();
-  }, [location.state]);
+  }, [location.state, week]);
 
   const getColorClass = (val) => {
     if (val >= 80) return 'green';
@@ -152,7 +130,7 @@ const Summary = () => {
   return (
     <div>
       <div className="page-header">
-        <h1>Dashboard Summary</h1>
+        <h1>Dashboard Summary — {week}</h1>
         <button className="btn btn-outline" onClick={() => navigate('/')}>Back to Checklist</button>
       </div>
 

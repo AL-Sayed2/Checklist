@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
 import { getHistory, getWeek, getAISummary, computeCompliance } from '../api';
+import { getCurrentWeekString } from '../utils/dateUtils';
 
 const AISummary = () => {
   const [data, setData] = useState({});
@@ -27,10 +28,7 @@ const AISummary = () => {
 
     try {
       if (!activeWeek) {
-        const now = new Date();
-        const start = new Date(now.getFullYear(), 0, 1);
-        const days = Math.floor((now - start) / (24 * 60 * 60 * 1000));
-        activeWeek = `${now.getFullYear()}-W${Math.ceil((now.getDay() + 1 + days) / 7).toString().padStart(2, '0')}`;
+        activeWeek = getCurrentWeekString();
         try {
           const res = await getWeek(activeWeek);
           if (res && res.data) activeData = res.data;

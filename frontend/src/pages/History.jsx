@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Line, Bar } from 'react-chartjs-2';
 import { getHistory, deleteWeek } from '../api';
+import { ROOMS as rooms, ROOM_NAMES as roomNames, CHECKLIST_ITEMS as checklistItems } from '../constants/checklistConfig';
 
-const rooms = ['rm1', 'rm2', 'rm3', 'rm4', 'rm5', 'rm6', 'rm7', 'rm8', 'sr', 'mwr'];
-const roomNames = ['RM1', 'RM2', 'RM3', 'RM4', 'RM5', 'RM6 Triage', 'RM7 Sterile', 'RM8 OPG', 'S.R.', 'M.W.R.'];
-const items = [...Array(21).keys()]; // just index placeholders for calculation
+const items = [...Array(checklistItems.length).keys()];
 
 const History = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedWeek, setExpandedWeek] = useState(null);
+  const [expandedYears, setExpandedYears] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +22,11 @@ const History = () => {
       setLoading(true);
       const res = await getHistory();
       setHistory(res);
+      // Auto expand the most recent year
+      if (res && res.length > 0) {
+        const firstYear = res[0].week.split('-')[0];
+        setExpandedYears({ [firstYear]: true });
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -91,6 +96,17 @@ const History = () => {
     );
   }
 
+  // Group history items by Year
+  const groupedHistory = history.reduce((acc, item) => {
+    const year = item.week.split('-')[0] || 'Unknown';
+    if (!acc[year]) acc[year] = [];
+    acc[year].push(item);
+    return acc;
+  }, {});
+
+  // Sorted list of years (descending)
+  const sortedYears = Object.keys(groupedHistory).sort((a, b) => b - a);
+
   return (
     <div>
       <div className="page-header">
@@ -104,45 +120,79 @@ const History = () => {
         </div>
       </div>
 
-      <div className="history-grid">
-        {history.map((h) => (
-          <div key={h.week} className="history-card">
-            <div className="history-header" onClick={() => setExpandedWeek(expandedWeek === h.week ? null : h.week)}>
-              <div className="history-week">
-                {h.week}
-                <span className={`badge ${getColorClass(h.compliance)}`}>{h.compliance}%</span>
+      <div className="history-by-year">
+        {sortedYears.map((year) => {
+          const isYearExpanded = !!expandedYears[year];
+          const yearChecklists = groupedHistory[year];
+          
+          return (
+            <div key={year} className="year-section card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+              <div 
+                className="year-header" 
+                onClick={() => setExpandedYears(prev => ({ ...prev, [year]: !prev[year] }))}
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '1.25rem',
+                  color: 'var(--teal)',
+                  padding: '0.5rem 0'
+                }}
+              >
+                <span>📅 Year {year} ({yearChecklists.length} {yearChecklists.length === 1 ? 'week' : 'weeks'})</span>
+                <span style={{ fontSize: '1rem', transition: 'transform 0.2s', transform: isYearExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  ▼
+                </span>
               </div>
-              <div className="history-stats">
-                <span>Pass: {h.totalPass}</span>
-                <span>Fail: {h.totalFail}</span>
-                <span>N/A: {h.totalNA}</span>
-                <span>{new Date(h.savedAt).toLocaleDateString()}</span>
-              </div>
-            </div>
+              
+              {isYearExpanded && (
+                <div className="history-grid" style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {yearChecklists.map((h) => (
+                    <div key={h.week} className="history-card" style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
+                      <div className="history-header" onClick={() => setExpandedWeek(expandedWeek === h.week ? null : h.week)}>
+                        <div className="history-week">
+                          {h.week}
+                          <span className={`badge ${getColorClass(h.compliance)}`}>{h.compliance}%</span>
+                        </div>
+                        <div className="history-stats">
+                          <span>Pass: {h.totalPass}</span>
+                          <span>Fail: {h.totalFail}</span>
+                          <span>N/A: {h.totalNA}</span>
+                          <span>{new Date(h.savedAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
 
-            {expandedWeek === h.week && (
-              <div className="history-details">
-                <div style={{ height: '200px', marginBottom: '1rem' }}>
-                  <Bar
-                    data={{
-                      labels: roomNames,
-                      datasets: [{
-                        label: 'Room Compliance %',
-                        data: getRoomComplianceData(h.data),
-                        backgroundColor: '#2d9e7e'
-                      }]
-                    }}
-                    options={{ responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }}
-                  />
+                      {expandedWeek === h.week && (
+                        <div className="history-details">
+                          <div style={{ height: '200px', marginBottom: '1rem' }}>
+                            <Bar
+                              data={{
+                                labels: roomNames,
+                                datasets: [{
+                                  label: 'Room Compliance %',
+                                  data: getRoomComplianceData(h.data),
+                                  backgroundColor: '#2d9e7e'
+                                }]
+                              }}
+                              options={{ responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }}
+                            />
+                          </div>
+                          <div className="history-actions">
+                            <button className="btn btn-outline" onClick={(e) => { e.stopPropagation(); navigate('/summary', { state: { week: h.week, data: h.data, notes: h.notes } }); }}>View Summary</button>
+                            <button className="btn btn-outline" onClick={(e) => { e.stopPropagation(); handleLoad(h); }}>Load into Checklist</button>
+                            <button className="btn btn-danger" onClick={(e) => handleDelete(e, h.week)}>Delete</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                <div className="history-actions">
-                  <button className="btn btn-outline" onClick={(e) => { e.stopPropagation(); handleLoad(h); }}>Load into Checklist</button>
-                  <button className="btn btn-danger" onClick={(e) => handleDelete(e, h.week)}>Delete</button>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
