@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ChecklistTable from '../components/ChecklistTable';
-import { getWeek, saveChecklist, computeCompliance } from '../api';
+import { getWeek, saveChecklist, computeCompliance, deleteWeek } from '../api';
 import { getCurrentWeekString } from '../utils/dateUtils';
 
 const Checklist = () => {
@@ -114,6 +114,22 @@ const Checklist = () => {
     }
   };
 
+  const handleDeleteWeek = async () => {
+    if (window.confirm(`Are you sure you want to permanently delete week ${week} from the database?`)) {
+      try {
+        setLoading(true);
+        await deleteWeek(week);
+        setData({});
+        setNotes('');
+        showToast('Week deleted from database successfully!');
+      } catch (err) {
+        alert('Failed to delete week from database. It may not exist in the database.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const handleViewSummary = () => {
     navigate('/summary', { state: { week, data, notes } });
   };
@@ -146,7 +162,8 @@ const Checklist = () => {
           </div>
 
           <div className="actions-row">
-            <button onClick={handleClear} className="btn btn-danger">Clear</button>
+            <button onClick={handleDeleteWeek} className="btn btn-danger" style={{ marginRight: 'auto' }}>Delete Week from DB</button>
+            <button onClick={handleClear} className="btn btn-danger">Clear Local</button>
             <button onClick={handleViewSummary} className="btn btn-outline">View Summary</button>
             <button onClick={handleSave} className="btn">Save to Database</button>
           </div>

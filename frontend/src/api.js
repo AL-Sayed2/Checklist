@@ -18,6 +18,20 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Interceptor to handle 401 Unauthorized responses (redirect to login)
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('clinic_token');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const login = async (password) => {
   const response = await axios.post(`${BASE}/api/auth/login`, { password });
   if (response.data.token) {
