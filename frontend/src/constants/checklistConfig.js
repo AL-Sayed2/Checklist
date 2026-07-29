@@ -1,7 +1,7 @@
-export const ROOMS = ['rm1', 'rm2', 'rm3', 'rm4', 'rm5', 'rm6', 'rm7', 'rm8', 'sr', 'mwr'];
+export const ROOMS = ['rm1', 'rm2', 'rm3', 'rm4', 'rm5', 'rm6', 'rm7', 'rm8', 'rm9', 'sr', 'mwr'];
 
 export const ROOM_NAMES = [
-  'RM1', 'RM2', 'RM3', 'RM4', 'RM5', 'RM6 Triage', 'RM7 Sterile', 'RM8 OPG', 'S.R.', 'M.W.R.'
+  'RM1', 'RM2 OPG', 'RM3', 'RM4', 'RM5', 'RM6 Triage', 'RM7 Sterile', 'RM8', 'RM9', 'S.R.', 'M.W.R.'
 ];
 
 export const CHECKLIST_ITEMS = [

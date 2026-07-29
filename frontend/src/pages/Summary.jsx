@@ -15,7 +15,7 @@ const Summary = () => {
     return getCurrentWeekString();
   });
   const [data, setData] = useState({});
-  const [stats, setStats] = useState({ compliance: 0, totalPass: 0, totalFail: 0, totalNA: 0, totalEmpty: 210 });
+  const [stats, setStats] = useState({ compliance: 0, totalPass: 0, totalFail: 0, totalNA: 0, totalEmpty: rooms.length * items.length });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
